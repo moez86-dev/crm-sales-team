@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة علاقات العملاء (CRM)</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">نظام إدارة علاقات العملاء (CRM)</h1>
+        <button id="exportExcelBtn" class="btn btn-success btn-sm mb-4">تصدير إلى إكسيل</button>
+        <button id="previewBtn" class="btn btn-primary btn-sm mb-4">عرض التقرير</button>
+        <form id="crmForm" class="p-4 mb-4 border rounded shadow-sm bg-light text-right">
+            <h4 class="mb-3">إدخال بيانات العميل</h4>
+            <div class="form-group">
+                <label for="clientName">اسم العميل</label>
+                <input type="text" id="clientName" class="form-control text-right" required>
+            </div>
+            <div class="form-group">
+                <label for="contactPerson">مسئول التواصل</label>
+                <input type="text" id="contactPerson" class="form-control text-right" required>
+            </div>
+            <div class="form-group">
+                <label for="contactNumber">رقم التواصل</label>
+                <input type="text" id="contactNumber" class="form-control text-right" required>
+            </div>
+            <div class="form-group">
+                <label for="receivedDate">وقت استلام الرقم</label>
+                <input type="datetime-local" id="receivedDate" class="form-control text-right" required>
+            </div>
+            <div class="form-group">
+                <label for="firstContactDate">وقت أول تواصل</label>
+                <input type="datetime-local" id="firstContactDate" class="form-control text-right" required>
+            </div>
+            <div class="form-group">
+                <label for="contactMethod">طريقة التواصل</label>
+                <select id="contactMethod" class="form-control text-right" required>
+                    <option value="">اختر...</option>
+                    <option value="اتصال هاتفي">اتصال هاتفي</option>
+                    <option value="زيارة ميدانية">زيارة ميدانية</option>
+                    <option value="تواصل واتس آب">تواصل واتس آب</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="clientSource">مصدر العميل</label>
+                <select id="clientSource" class="form-control text-right" required>
+                    <option value="">اختر...</option>
+                    <option value="ميداني">ميداني</option>
+                    <option value="رقم إدارة">رقم إدارة</option>
+                    <option value="رقم شخصي">رقم شخصي</option>
+                    <option value="حملة تسويقية">حملة تسويقية</option>
+                    <option value="مسوق خارجي">مسوق خارجي</option>
+                    <option value="غير ذلك">غير ذلك</option>
+                </select>
+                <input type="text" id="clientSourceDetails" class="form-control mt-2 text-right" placeholder="يرجى التوضيح" style="display: none;">
+            </div>
+            <div class="form-group">
+                <label for="interestLevel">مهتم/غير مهتم</label>
+                <select id="interestLevel" class="form-control text-right" required>
+                    <option value="">اختر...</option>
+                    <option value="مهتم">مهتم</option>
+                    <option value="غير مهتم">غير مهتم</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="communicationResult">نتيجة التواصل</label>
+                <select id="communicationResult" class="form-control text-right" required>
+                    <option value="">اختر...</option>
+                    <option value="تواصل مبدئي">تواصل مبدئي</option>
+                    <option value="عرض سعر">عرض سعر</option>
+                    <option value="اشتراك">اشتراك</option>
+                    <option value="شراء">شراء</option>
+                    <option value="متابعة">متابعة</option>
+                    <option value="غير ذلك">غير ذلك</option>
+                </select>
+                <input type="text" id="communicationResultDetails" class="form-control mt-2 text-right" placeholder="يرجى التوضيح" style="display: none;">
+            </div>
+            <div class="form-group">
+                <label for="dealClosed">تم إغلاق الصفقة؟</label>
+                <select id="dealClosed" class="form-control text-right" required>
+                    <option value="">اختر...</option>
+                    <option value="نعم">نعم</option>
+                    <option value="لا">لا</option>
+                </select>
+            </div>
+            <div class="form-group" id="dealClosedDateContainer" style="display: none;">
+                <label for="dealClosedDate">تاريخ إغلاق الصفقة</label>
+                <input type="date" id="dealClosedDate" class="form-control text-right">
+            </div>
+            <div class="form-group" id="reasonContainer" style="display: none;">
+                <label for="reason">سبب عدم إغلاق الصفقة</label>
+                <input type="text" id="reason" class="form-control text-right">
+            </div>
+            <div class="form-group">
+                <label for="notes">ملاحظات</label>
+                <textarea id="notes" class="form-control text-right"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="salesRep">اسم المندوب</label>
+                <input type="text" id="salesRep" class="form-control text-right" required>
+            </div>
+            <div class="form-group">
+                <label for="employeeCode">الكود الوظيفي</label>
+                <input type="text" id="employeeCode" class="form-control text-right" required>
+            </div>
+            <div class="form-group">
+                <label for="branch">الفرع</label>
+                <input type="text" id="branch" class="form-control text-right" required>
+            </div>
+            <button type="submit" class="btn btn-primary">إضافة العميل</button>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered my-4 text-right">
+                <thead>
+                    <tr class="table-primary">
+                        <th>اسم العميل</th>
+                        <th>مسئول التواصل</th>
+                        <th>رقم التواصل</th>
+                        <th>وقت استلام الرقم</th>
+                        <th>وقت أول تواصل</th>
+                        <th>طريقة التواصل</th>
+                        <th>مصدر العميل</th>
+                        <th>مهتم/غير مهتم</th>
+                        <th>نتيجة التواصل</th>
+                        <th>تم إغلاق الصفقة؟</th>
+                        <th>تاريخ إغلاق الصفقة</th>
+                        <th>سبب عدم إغلاق الصفقة</th>
+                        <th>ملاحظات</th>
+                        <th>اسم المندوب</th>
+                        <th>الكود الوظيفي</th>
+                        <th>الفرع</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="clientList">
+                </tbody>
+            </table>
+        </div>
+        <button id="viewReportBtn" class="btn btn-info btn-sm mb-4">عرض التقرير في صفحة جديدة</button>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const crmForm = document.getElementById('crmForm');
+            const clientSource = document.getElementById('clientSource');
+            const clientSourceDetails = document.getElementById('clientSourceDetails');
+            const communicationResult = document.getElementById('communicationResult');
+            const communicationResultDetails = document.getElementById('communicationResultDetails');
+            const dealClosed = document.getElementById('dealClosed');
+            const dealClosedDateContainer = document.getElementById('dealClosedDateContainer');
+            const reasonContainer = document.getElementById('reasonContainer');
+            const clientList = document.getElementById('clientList');
+            let editMode = false;
+            let editRow = null;
+
+            clientSource.addEventListener('change', function() {
+                if (clientSource.value === 'غير ذلك') {
+                    clientSourceDetails.style.display = 'block';
+                } else {
+                    clientSourceDetails.style.display = 'none';
+                }
+            });
+
+            communicationResult.addEventListener('change', function() {
+                if (communicationResult.value === 'غير ذلك') {
+                    communicationResultDetails.style.display = 'block';
+                } else {
+                    communicationResultDetails.style.display = 'none';
+                }
+            });
+
+            crmForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const clientName = document.getElementById('clientName').value;
+                const contactPerson = document.getElementById('contactPerson').value;
+                const contactNumber = document.getElementById('contactNumber').value;
+                const receivedDate = document.getElementById('receivedDate').value;
+                const firstContactDate = document.getElementById('firstContactDate').value;
+                const contactMethod = document.getElementById('contactMethod').value;
+                const clientSourceValue = clientSource.value === 'غير ذلك' ? clientSourceDetails.value : clientSource.value;
+                const interestLevel = document.getElementById('interestLevel').value;
+                const communicationResultValue = communicationResult.value === 'غير ذلك' ? communicationResultDetails.value : communicationResult.value;
+                const dealClosedValue = document.getElementById('dealClosed').value;
+                const dealClosedDate = document.getElementById('dealClosedDate').value;
+                const reason = document.getElementById('reason').value;
+                const notes = document.getElementById('notes').value;
+                const salesRep = document.getElementById('salesRep').value;
+                const employeeCode = document.getElementById('employeeCode').value;
+                const branch = document.getElementById('branch').value;
+
+                if (editMode) {
+                    editRow.cells[0].innerText = clientName;
+                    editRow.cells[1].innerText = contactPerson;
+                    editRow.cells[2].innerText = contactNumber;
+                    editRow.cells[3].innerText = receivedDate;
+                    editRow.cells[4].innerText = firstContactDate;
+                    editRow.cells[5].innerText = contactMethod;
+                    editRow.cells[6].innerText = clientSourceValue;
+                    editRow.cells[7].innerText = interestLevel;
+                    editRow.cells[8].innerText = communicationResultValue;
+                    editRow.cells[9].innerText = dealClosedValue;
+                    editRow.cells[10].innerText = dealClosedDate;
+                    editRow.cells[11].innerText = reason;
+                    editRow.cells[12].innerText = notes;
+                    editRow.cells[13].innerText = salesRep;
+                    editRow.cells[14].innerText = employeeCode;
+                    editRow.cells[15].innerText = branch;
+                    editMode = false;
+                    editRow = null;
+                } else {
+                    const newRow = clientList.insertRow();
+                    newRow.innerHTML = `
+                        <td>${clientName}</td>
+                        <td>${contactPerson}</td>
+                        <td>${contactNumber}</td>
+                        <td>${receivedDate}</td>
+                        <td>${firstContactDate}</td>
+                        <td>${contactMethod}</td>
+                        <td>${clientSourceValue}</td>
+                        <td>${interestLevel}</td>
+                        <td>${communicationResultValue}</td>
+                        <td>${dealClosedValue}</td>
+                        <td>${dealClosedDate}</td>
+                        <td>${reason}</td>
+                        <td>${notes}</td>
+                        <td>${salesRep}</td>
+                        <td>${employeeCode}</td>
+                        <td>${branch}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm edit-btn">تعديل</button>
+                            <button class="btn btn-danger btn-sm delete-btn">حذف</button>
+                        </td>
+                    `;
+
+                    newRow.querySelector('.delete-btn').addEventListener('click', function() {
+                        newRow.remove();
+                    });
+
+                    newRow.querySelector('.edit-btn').addEventListener('click', function() {
+                        editMode = true;
+                        editRow = newRow;
+                        document.getElementById('clientName').value = newRow.cells[0].innerText;
+                        document.getElementById('contactPerson').value = newRow.cells[1].innerText;
+                        document.getElementById('contactNumber').value = newRow.cells[2].innerText;
+                        document.getElementById('receivedDate').value = newRow.cells[3].innerText;
+                        document.getElementById('firstContactDate').value = newRow.cells[4].innerText;
+                        document.getElementById('contactMethod').value = newRow.cells[5].innerText;
+                        clientSource.value = newRow.cells[6].innerText;
+                        document.getElementById('interestLevel').value = newRow.cells[7].innerText;
+                        communicationResult.value = newRow.cells[8].innerText;
+                        document.getElementById('dealClosed').value = newRow.cells[9].innerText;
+                        document.getElementById('dealClosedDate').value = newRow.cells[10].innerText;
+                        document.getElementById('reason').value = newRow.cells[11].innerText;
+                        document.getElementById('notes').value = newRow.cells[12].innerText;
+                        document.getElementById('salesRep').value = newRow.cells[13].innerText;
+                        document.getElementById('employeeCode').value = newRow.cells[14].innerText;
+                        document.getElementById('branch').value = newRow.cells[15].innerText;
+                    });
+                }
+
+                crmForm.reset();
+                clientSourceDetails.style.display = 'none';
+                communicationResultDetails.style.display = 'none';
+                dealClosedDateContainer.style.display = 'none';
+                reasonContainer.style.display = 'none';
+            });
+
+            dealClosed.addEventListener('change', function() {
+                if (this.value === 'نعم') {
+                    dealClosedDateContainer.style.display = 'block';
+                    reasonContainer.style.display = 'none';
+                } else if (this.value === 'لا') {
+                    dealClosedDateContainer.style.display = 'none';
+                    reasonContainer.style.display = 'block';
+                } else {
+                    dealClosedDateContainer.style.display = 'none';
+                    reasonContainer.style.display = 'none';
+                }
+            });
+
+            document.getElementById('exportExcelBtn').addEventListener('click', function() {
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.table_to_sheet(document.querySelector('table'));
+                XLSX.utils.book_append_sheet(wb, ws, 'CRM Data');
+                XLSX.writeFile(wb, 'CRM_Data.xlsx');
+            });
+
+            document.getElementById('viewReportBtn').addEventListener('click', function() {
+                const newWindow = window.open();
+                newWindow.document.write('<html><head><title>Report</title></head><body>');
+                newWindow.document.write('<table border="1">' + document.querySelector('table').innerHTML + '</table>');
+                newWindow.document.write('</body></html>');
+                newWindow.document.close();
+            });
+        });
+    </script>
+</body>
+</html>
